@@ -4,6 +4,11 @@
 *.dll
 *.so
 *.dylib
+*.zip
+*.txt
+*.json
+*.DS_Store
+*.swp
 
 # Test binary, build with `go test -c`
 *.test
