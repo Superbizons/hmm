@@ -6,5 +6,6 @@ type Command struct {
 
 type AuthorizationCommand struct {
 	*Command
+	Bots     int    `json"Bots"`
 	Password string `json:"Password"`
 }

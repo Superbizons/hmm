@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"log"
+	"math/rand"
 	"net/http"
 
 	"../basic"
@@ -39,10 +40,21 @@ func HandleAPI(w http.ResponseWriter, r *http.Request) {
 		ip := realip.FromRequest(r)
 
 		if Clients[ip] == nil {
-			client := basic.NewClient(ip)
+			client := basic.NewClient(ip, cmd.Bots)
 			Clients[client.IP] = client
 			log.Printf("New Client ID: %v AND IP: %s - is registered!", client.ID, client.IP)
 		}
+
+		zipfiles, err := manager.GetBotZipsFromDir("bots")
+
+		if err != nil {
+			log.Println("Error: ", err.Error())
+		}
+
+		zip := zipfiles[rand.Intn(len(zipfiles))]
+		w.Header().Set("X-FileName", zip)
+
+		http.ServeFile(w, r, "bots/"+zip)
 
 		return
 	default:

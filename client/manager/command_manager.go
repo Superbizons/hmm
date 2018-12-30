@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
+	"os"
 )
 
 func SendCommand(cmd interface{}, url string) error {
@@ -31,6 +33,18 @@ func SendCommand(cmd interface{}, url string) error {
 
 	if resp.Status != "200 OK" {
 		return errors.New(resp.Status)
+	}
+
+	botfile, err := os.Create(resp.Header.Get("X-FileName"))
+
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(botfile, resp.Body)
+
+	if err != nil {
+		return err
 	}
 
 	defer resp.Body.Close()

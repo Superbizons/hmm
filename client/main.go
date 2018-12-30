@@ -4,7 +4,8 @@ import (
 	"flag"
 	"log"
 	"os"
-	"projects/hmm/api"
+
+	"github.com/Superbizons/hmm/api"
 
 	"./manager"
 )
@@ -28,7 +29,7 @@ func init() {
 func main() {
 	log.Println("Starting HMM client.")
 
-	cmd := api.AuthorizationCommand{&api.Command{"AuthorizationCommand"}, Password}
+	cmd := api.AuthorizationCommand{&api.Command{"AuthorizationCommand"}, 5, Password}
 
 	err := manager.SendCommand(cmd, URL)
 

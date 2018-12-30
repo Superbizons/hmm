@@ -18,6 +18,13 @@ func main() {
 		return
 	}
 
+	err = manager.CreateDirIfnExist("bots")
+
+	if err != nil {
+		log.Println("Error: ", err.Error())
+		return
+	}
+
 	configuration, err := manager.LoadConfiguration()
 
 	if err != nil {
