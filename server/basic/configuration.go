@@ -1,4 +1,4 @@
-package api
+package basic
 
 type Configuration struct {
 	Port     string `json:"Port"`

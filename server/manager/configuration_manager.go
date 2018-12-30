@@ -4,18 +4,18 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"../api"
+	"../basic"
 )
 
 var (
-	Configuration *api.Configuration
+	Configuration *basic.Configuration
 )
 
-func LoadConfiguration() (*api.Configuration, error) {
+func LoadConfiguration() (*basic.Configuration, error) {
 	configurationFile, err := ioutil.ReadFile("./configuration.json")
 
 	if err != nil {
-		return &api.Configuration{}, err
+		return &basic.Configuration{}, err
 	}
 
 	err = json.Unmarshal(configurationFile, &Configuration)
