@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func SendCommand(cmd interface{}, url string) error {
@@ -35,7 +36,13 @@ func SendCommand(cmd interface{}, url string) error {
 		return errors.New(resp.Status)
 	}
 
-	botfile, err := os.Create(resp.Header.Get("X-FileName"))
+	filename := resp.Header.Get("X-FileName")
+
+	if strings.Contains(filename, "/") {
+		return errors.New("Invalid file name." + filename)
+	}
+
+	botfile, err := os.Create(filename)
 
 	if err != nil {
 		return err
