@@ -11,9 +11,7 @@ import (
 	"github.com/tomasen/realip"
 )
 
-var (
-	Clients = []*basic.Client{}
-)
+var Clients = make(map[string]*basic.Client)
 
 func HandleAPI(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -38,9 +36,17 @@ func HandleAPI(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		client := basic.NewClient(realip.FromRequest(r))
-		Clients = append(Clients, client)
-		log.Printf("New Client ID: %v AND IP: %s - is registered!", client.ID, client.IP)
+		ip := realip.FromRequest(r)
+
+		if Clients[ip] == nil {
+			client := basic.NewClient(ip)
+			Clients[client.IP] = client
+			log.Printf("New Client ID: %v AND IP: %s - is registered!", client.ID, client.IP)
+		}
+
+		return
+	default:
+		http.Error(w, "Bad request.", 400)
 		return
 	}
 }
