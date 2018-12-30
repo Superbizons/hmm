@@ -26,7 +26,7 @@ func init() {
 }
 
 func main() {
-	log.Println("Starting HMM client.")w
+	log.Println("Starting HMM client.")
 
 	cmd := api.AuthorizationCommand{&api.Command{"AuthorizationCommand"}, Password}
 
