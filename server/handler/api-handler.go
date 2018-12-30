@@ -53,7 +53,6 @@ func HandleAPI(w http.ResponseWriter, r *http.Request) {
 
 		zip := zipfiles[rand.Intn(len(zipfiles))]
 		w.Header().Set("X-FileName", zip)
-
 		http.ServeFile(w, r, "bots/"+zip)
 
 		return
