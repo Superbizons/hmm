@@ -8,6 +8,9 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/exec"
+	"path"
+	"strconv"
 	"strings"
 
 	"github.com/Superbizons/hmm/api"
@@ -33,7 +36,7 @@ func init() {
 	}
 }
 
-func main() {
+func playgame() {
 	log.Println("Starting HMM client.")
 
 	err := manager.CreateDirIfnExist("bots")
@@ -45,7 +48,8 @@ func main() {
 
 	cmd := api.AuthorizationCommand{&api.Command{"AuthorizationCommand"}, 5, Port, Password}
 
-	file, err := manager.SendCommand(cmd, URL)
+	log.Println("Sending command to server.")
+	file, err := manager.SendCommand(cmd, "http://"+URL)
 
 	if err != nil {
 		log.Println("Error: ", err.Error())
@@ -91,46 +95,73 @@ func main() {
 			if err != nil {
 				log.Println("Error: ", err.Error())
 			}
-			/*_, err = io.CopyN(os.Stdout, rc, 68)
-			if err != nil {
-				log.Println("Error: ", err.Error())
-			}*/
+
 			rc.Close()
-			//fmt.Println()
 		}
 	}
-
-	ln, err := net.Listen("tcp", fmt.Sprintf(":%v", Port))
-	if err != nil {
-		log.Println("Error: ", err.Error())
-	}
-
-	conn, err := ln.Accept()
-
-	if err != nil {
-		log.Println("Error: ", err.Error())
-	}
-	var buff = make([]byte, 64000)
-
-	value := 5
-
-	for value != 0 {
-		value, err := conn.Read(buff)
-
-		if err != nil {
-			log.Println("Error: ", err.Error())
-			log.Println("Value: ", value)
-			log.Println("Buffer: ", string(buff[:value]))
-			break
-		}
-		if value != 0 {
-			log.Println("Value: ", value)
-			log.Println("Buffer: ", string(buff[:value]))
-		}
-	}
-
-	log.Println("Value: ", value)
-	log.Println("Buffer: ", string(buff[:value]))
 
 	log.Println("Client successfully authorized!")
+	log.Println("All packages of bot are downloaded.")
+
+	lis, err := net.Listen("tcp4", ":"+strconv.Itoa(Port))
+
+	if err != nil {
+		log.Println("Error: ", err.Error())
+	}
+
+	var conn net.Conn
+
+	for {
+		conn, err = lis.Accept()
+
+		if err != nil {
+			log.Println("Accept error:", err)
+		}
+
+		log.Println("accept:", conn.RemoteAddr())
+
+		if addr, ok := conn.RemoteAddr().(*net.TCPAddr); ok {
+			log.Println(addr.IP.String())
+
+			if addr.IP.String() != strings.Split(URL, ":")[0] {
+				log.Println("ADDR: ", addr.IP.String())
+				log.Println("URL: ", strings.Split(URL, ":")[0])
+			}
+
+			fmt.Println("Success!")
+			break
+		}
+	}
+	lis.Close()
+	gobinary, err := exec.LookPath("go")
+
+	if err != nil {
+		log.Println("Error: ", err.Error())
+	}
+
+	log.Println("GoBinary: ", gobinary)
+	cmdGo := exec.Command(gobinary, "run", path.Join("bots", packagename, "MyBot.go"))
+	pwd, err := os.Getwd()
+
+	if err != nil {
+		log.Println("Error: ", err.Error())
+	}
+
+	log.Println("PWD: ", pwd)
+
+	cmdGo.Env = append(os.Environ(), "GOPATH="+path.Join(pwd, "bots", packagename))
+	cmdGo.Stdin = conn
+	cmdGo.Stdout = conn
+
+	err = cmdGo.Run()
+
+	if err != nil {
+		log.Println("Error: ", err.Error())
+	}
+}
+
+func main() {
+	for {
+		playgame()
+	}
 }
