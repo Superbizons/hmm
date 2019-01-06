@@ -36,6 +36,16 @@ func init() {
 	}
 }
 
+func playconnection(conn net.Conn, cmdGo *exec.Cmd) {
+	err := cmdGo.Run()
+
+	if err != nil {
+		log.Println("Error: ", err.Error())
+	}
+
+	defer conn.Close()
+}
+
 func playgame() {
 	log.Println("Starting HMM client.")
 
@@ -129,39 +139,33 @@ func playgame() {
 			}
 
 			fmt.Println("Success!")
-			break
 		}
-	}
-	lis.Close()
-	gobinary, err := exec.LookPath("go")
 
-	if err != nil {
-		log.Println("Error: ", err.Error())
-	}
+		defer lis.Close()
+		gobinary, err := exec.LookPath("go")
 
-	log.Println("GoBinary: ", gobinary)
-	cmdGo := exec.Command(gobinary, "run", path.Join("bots", packagename, "MyBot.go"))
-	pwd, err := os.Getwd()
+		if err != nil {
+			log.Println("Error: ", err.Error())
+		}
 
-	if err != nil {
-		log.Println("Error: ", err.Error())
-	}
+		log.Println("GoBinary: ", gobinary)
+		cmdGo := exec.Command(gobinary, "run", path.Join("bots", packagename, "MyBot.go"))
+		pwd, err := os.Getwd()
 
-	log.Println("PWD: ", pwd)
+		if err != nil {
+			log.Println("Error: ", err.Error())
+		}
 
-	cmdGo.Env = append(os.Environ(), "GOPATH="+path.Join(pwd, "bots", packagename))
-	cmdGo.Stdin = conn
-	cmdGo.Stdout = conn
+		log.Println("PWD: ", pwd)
 
-	err = cmdGo.Run()
+		cmdGo.Env = append(os.Environ(), "GOPATH="+path.Join(pwd, "bots", packagename))
+		cmdGo.Stdin = conn
+		cmdGo.Stdout = conn
 
-	if err != nil {
-		log.Println("Error: ", err.Error())
+		go playconnection(conn, cmdGo)
 	}
 }
 
 func main() {
-	for {
-		playgame()
-	}
+	playgame()
 }
